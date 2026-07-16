@@ -5,6 +5,15 @@ import { prisma } from "./db";
 import { loginSchema } from "./validators";
 import { Role } from "@prisma/client";
 
+import { CredentialsSignin } from "next-auth";
+
+class CustomAuthError extends CredentialsSignin {
+  constructor(message: string) {
+    super(message);
+    this.code = message;
+  }
+}
+
 export const authConfig: NextAuthConfig = {
   trustHost: true,
   secret: process.env.AUTH_SECRET || "f6c8d28a3910c51e08920155b5501dc6e7c1f4ab0213d8e578c9",
@@ -19,7 +28,7 @@ export const authConfig: NextAuthConfig = {
         try {
           const parsed = loginSchema.safeParse(credentials);
           if (!parsed.success) {
-            throw new Error("Invalid credentials format");
+            throw new CustomAuthError("Invalid credentials format");
           }
 
           const { email, password } = parsed.data;
@@ -32,12 +41,12 @@ export const authConfig: NextAuthConfig = {
           });
 
           if (!user || !user.passwordHash) {
-            throw new Error("User not found");
+            throw new CustomAuthError("User not found");
           }
 
           const isPasswordValid = bcrypt.compareSync(password, user.passwordHash);
           if (!isPasswordValid) {
-            throw new Error("Invalid password");
+            throw new CustomAuthError("Invalid password");
           }
 
           return {
@@ -54,7 +63,10 @@ export const authConfig: NextAuthConfig = {
           };
         } catch (error: any) {
           console.error("Auth Error:", error);
-          throw new Error(error.message || "Unknown database error");
+          if (error instanceof CustomAuthError) {
+            throw error;
+          }
+          throw new CustomAuthError(error.message || "Unknown database error");
         }
       },
     }),
