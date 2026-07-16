@@ -1,30 +1,23 @@
 import { PrismaClient } from "@prisma/client";
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import ws from "ws";
-
-// Set up WebSocket polyfill for Neon serverless in Node environments
-neonConfig.webSocketConstructor = ws;
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 /**
- * Creates a PrismaClient with the PrismaNeon WebSocket driver adapter.
- * Only called on first actual database query — not at module import time.
+ * Creates a PrismaClient with the PrismaPg driver adapter.
  */
 function createPrismaClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_yIRw8WAVZp6e@ep-red-field-atpa7xn1.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require";
   if (!connectionString) {
     throw new Error(
-      "DATABASE_URL environment variable is not set. " +
-        "Copy .env.example to .env and fill in your PostgreSQL connection string."
+      "DATABASE_URL environment variable is not set. "
     );
   }
   const pool = new Pool({ connectionString });
-  // @ts-expect-error - Prisma adapter types might mismatch Neon's Pool type due to versioning
-  const adapter = new PrismaNeon(pool);
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
