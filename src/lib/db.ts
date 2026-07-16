@@ -15,7 +15,7 @@ const globalForPrisma = globalThis as unknown as {
  * Only called on first actual database query — not at module import time.
  */
 function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_yIRw8WAVZp6e@ep-red-field-atpa7xn1.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require";
   if (!connectionString) {
     throw new Error(
       "DATABASE_URL environment variable is not set. " +
