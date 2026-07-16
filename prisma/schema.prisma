@@ -1,0 +1,191 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  REP
+  VIEWER
+}
+
+enum DealStatus {
+  OPEN
+  WON
+  LOST
+}
+
+enum ActivityType {
+  STAGE_CHANGE
+  VALUE_CHANGE
+  NOTE_ADDED
+  CREATED
+  AI_RISK_ASSESSED
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users          User[]
+  pipelineStages PipelineStage[]
+  accounts       Account[]
+
+  @@map("organizations")
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  passwordHash   String       @map("password_hash")
+  fullName       String       @map("full_name")
+  role           Role         @default(REP)
+  organizationId String       @map("organization_id")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ownedDeals   Deal[]        @relation("DealOwner")
+  activities   ActivityLog[] @relation("ActivityActor")
+  notes        DealNote[]    @relation("NoteAuthor")
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+model PipelineStage {
+  id                 String   @id @default(cuid())
+  name               String
+  orderIndex         Int      @map("order_index")
+  defaultProbability Int      @default(50) @map("default_probability")
+  colorToken         String   @default("blue") @map("color_token")
+  organizationId     String   @map("organization_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deals        Deal[]
+
+  @@unique([organizationId, orderIndex])
+  @@index([organizationId])
+  @@map("pipeline_stages")
+}
+
+model Account {
+  id             String   @id @default(cuid())
+  name           String
+  industry       String?
+  website        String?
+  organizationId String   @map("organization_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contacts     Contact[]
+  deals        Deal[]
+
+  @@index([organizationId])
+  @@map("accounts")
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  fullName  String   @map("full_name")
+  email     String?
+  phone     String?
+  title     String?
+  accountId String   @map("account_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  deals   Deal[]
+
+  @@index([accountId])
+  @@map("contacts")
+}
+
+model Deal {
+  id                String     @id @default(cuid())
+  title             String
+  value             Decimal    @db.Decimal(15, 2)
+  probability       Int
+  stageId           String     @map("stage_id")
+  accountId         String     @map("account_id")
+  contactId         String?    @map("contact_id")
+  ownerId           String     @map("owner_id")
+  expectedCloseDate DateTime   @map("expected_close_date")
+  status            DealStatus @default(OPEN)
+  deletedAt         DateTime?  @map("deleted_at")
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+
+  stage        PipelineStage    @relation(fields: [stageId], references: [id])
+  account      Account          @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  contact      Contact?         @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  owner        User             @relation("DealOwner", fields: [ownerId], references: [id])
+  activities   ActivityLog[]
+  notes        DealNote[]
+  riskAnalysis DealRiskAnalysis?
+
+  @@index([stageId])
+  @@index([accountId])
+  @@index([ownerId])
+  @@index([deletedAt])
+  @@map("deals")
+}
+
+model ActivityLog {
+  id         String       @id @default(cuid())
+  dealId     String       @map("deal_id")
+  actorId    String       @map("actor_id")
+  actionType ActivityType @map("action_type")
+  oldValue   String?      @map("old_value")
+  newValue   String?      @map("new_value")
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  deal  Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  actor User @relation("ActivityActor", fields: [actorId], references: [id])
+
+  @@index([dealId])
+  @@index([actorId])
+  @@map("activity_logs")
+}
+
+model DealNote {
+  id        String   @id @default(cuid())
+  dealId    String   @map("deal_id")
+  authorId  String   @map("author_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  deal   Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  author User @relation("NoteAuthor", fields: [authorId], references: [id])
+
+  @@index([dealId])
+  @@index([authorId])
+  @@map("deal_notes")
+}
+
+model DealRiskAnalysis {
+  id             String   @id @default(cuid())
+  dealId         String   @unique @map("deal_id")
+  riskScore      Int      @map("risk_score")
+  riskLevel      String   @map("risk_level")
+  stallDays      Int      @map("stall_days")
+  summary        String
+  recommendation String
+  assessedAt     DateTime @default(now()) @map("assessed_at")
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@map("deal_risk_analyses")
+}
