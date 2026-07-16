@@ -23,6 +23,7 @@ function createPrismaClient(): PrismaClient {
     );
   }
   const pool = new Pool({ connectionString });
+  // @ts-expect-error - Prisma adapter types might mismatch Neon's Pool type due to versioning
   const adapter = new PrismaNeon(pool);
   return new PrismaClient({
     adapter,
