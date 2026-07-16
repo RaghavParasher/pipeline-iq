@@ -1,14 +1,18 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import ws from "ws";
+
+// Set up WebSocket polyfill for Neon serverless in Node environments
+neonConfig.webSocketConstructor = ws;
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 /**
- * Creates a PrismaClient with the PrismaPg driver adapter.
+ * Creates a PrismaClient with the PrismaNeon WebSocket driver adapter.
  * Only called on first actual database query — not at module import time.
- * This allows Next.js to build without DATABASE_URL being set.
  */
 function createPrismaClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
@@ -18,7 +22,8 @@ function createPrismaClient(): PrismaClient {
         "Copy .env.example to .env and fill in your PostgreSQL connection string."
     );
   }
-  const adapter = new PrismaPg({ connectionString });
+  const pool = new Pool({ connectionString });
+  const adapter = new PrismaNeon(pool);
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
