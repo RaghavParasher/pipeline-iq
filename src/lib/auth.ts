@@ -17,7 +17,7 @@ export const authConfig: NextAuthConfig = {
         try {
           const parsed = loginSchema.safeParse(credentials);
           if (!parsed.success) {
-            return null;
+            throw new Error("Invalid credentials format");
           }
 
           const { email, password } = parsed.data;
@@ -30,12 +30,12 @@ export const authConfig: NextAuthConfig = {
           });
 
           if (!user || !user.passwordHash) {
-            return null;
+            throw new Error("User not found");
           }
 
           const isPasswordValid = bcrypt.compareSync(password, user.passwordHash);
           if (!isPasswordValid) {
-            return null;
+            throw new Error("Invalid password");
           }
 
           return {
@@ -50,9 +50,9 @@ export const authConfig: NextAuthConfig = {
               slug: user.organization.slug,
             },
           };
-        } catch (error) {
+        } catch (error: any) {
           console.error("Auth Error:", error);
-          return null;
+          throw new Error(error.message || "Unknown database error");
         }
       },
     }),

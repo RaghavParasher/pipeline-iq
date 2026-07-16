@@ -55,7 +55,7 @@ function LoginForm() {
         redirect: false,
       });
       if (res?.error) {
-        setError("Demo credentials not found. Did you run `npm run db:seed`?");
+        setError(`Database Error: ${res.error}`);
         setIsLoading(false);
       } else {
         router.push(callbackUrl);
