@@ -48,17 +48,22 @@ function LoginForm() {
   async function handleQuickDemoSignIn() {
     setIsLoading(true);
     setError(null);
-    const res = await signIn("credentials", {
-      email: "demo@demo.com",
-      password: "demo1234",
-      redirect: false,
-    });
-    if (res?.error) {
-      setError("Demo credentials not found. Did you run `npm run db:seed`?");
+    try {
+      const res = await signIn("credentials", {
+        email: "demo@demo.com",
+        password: "demo1234",
+        redirect: false,
+      });
+      if (res?.error) {
+        setError("Demo credentials not found. Did you run `npm run db:seed`?");
+        setIsLoading(false);
+      } else {
+        router.push(callbackUrl);
+        router.refresh();
+      }
+    } catch {
+      setError("Server connection failed. Please check your database connection or Netlify logs.");
       setIsLoading(false);
-    } else {
-      router.push(callbackUrl);
-      router.refresh();
     }
   }
 

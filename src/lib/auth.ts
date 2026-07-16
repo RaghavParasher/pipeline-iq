@@ -14,41 +14,46 @@ export const authConfig: NextAuthConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const parsed = loginSchema.safeParse(credentials);
-        if (!parsed.success) {
+        try {
+          const parsed = loginSchema.safeParse(credentials);
+          if (!parsed.success) {
+            return null;
+          }
+
+          const { email, password } = parsed.data;
+
+          const user = await prisma.user.findUnique({
+            where: { email },
+            include: {
+              organization: true,
+            },
+          });
+
+          if (!user || !user.passwordHash) {
+            return null;
+          }
+
+          const isPasswordValid = bcrypt.compareSync(password, user.passwordHash);
+          if (!isPasswordValid) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.fullName,
+            role: user.role,
+            organizationId: user.organizationId,
+            organization: {
+              id: user.organization.id,
+              name: user.organization.name,
+              slug: user.organization.slug,
+            },
+          };
+        } catch (error) {
+          console.error("Auth Error:", error);
           return null;
         }
-
-        const { email, password } = parsed.data;
-
-        const user = await prisma.user.findUnique({
-          where: { email },
-          include: {
-            organization: true,
-          },
-        });
-
-        if (!user || !user.passwordHash) {
-          return null;
-        }
-
-        const isPasswordValid = bcrypt.compareSync(password, user.passwordHash);
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.fullName,
-          role: user.role,
-          organizationId: user.organizationId,
-          organization: {
-            id: user.organization.id,
-            name: user.organization.name,
-            slug: user.organization.slug,
-          },
-        };
       },
     }),
   ],
