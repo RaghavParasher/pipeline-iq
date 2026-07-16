@@ -6,6 +6,8 @@ import { loginSchema } from "./validators";
 import { Role } from "@prisma/client";
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
+  secret: process.env.AUTH_SECRET || "f6c8d28a3910c51e08920155b5501dc6e7c1f4ab0213d8e578c9",
   providers: [
     CredentialsProvider({
       name: "Credentials",
