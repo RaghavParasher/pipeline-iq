@@ -50,8 +50,8 @@ function LoginForm() {
     setError(null);
     try {
       const res = await signIn("credentials", {
-        email: "demo@demo.com",
-        password: "demo1234",
+        email: "admin@admin.com",
+        password: "admin1234",
         redirect: false,
       });
       if (res?.error) {
@@ -102,7 +102,7 @@ function LoginForm() {
             <span>Reviewer Zero-Friction Login</span>
           </div>
           <p className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 mb-2">
-            Sign in as Admin (<code>demo@demo.com</code>) to evaluate all CRUD &amp; AI features.
+            Sign in as Admin (<code>admin@admin.com</code>) to evaluate all CRUD &amp; AI features.
           </p>
           <Button
             type="button"
@@ -139,7 +139,7 @@ function LoginForm() {
             <Input
               id="login-email"
               type="email"
-              placeholder="name@company.com"
+              placeholder="admin@admin.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -150,7 +150,7 @@ function LoginForm() {
             <div className="flex items-center justify-between">
               <Label htmlFor="login-password">Password</Label>
               <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                Default: demo1234
+                Default: admin1234
               </span>
             </div>
             <Input

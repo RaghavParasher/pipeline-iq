@@ -32,11 +32,11 @@ async function main() {
   console.log(`✅ Created Organization: ${org.name}`);
 
   // 2. Create Users (hashed with bcrypt cost 12)
-  const passwordHash = bcrypt.hashSync("demo1234", 12);
+  const passwordHash = bcrypt.hashSync("admin1234", 12);
 
   const adminUser = await prisma.user.create({
     data: {
-      email: "demo@demo.com",
+      email: "admin@admin.com",
       fullName: "Shreyansh Singh (Demo Admin)",
       passwordHash,
       role: Role.ADMIN,
