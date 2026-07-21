@@ -1,146 +1,144 @@
-# PipelineIQ — Enterprise B2B Deal Pipeline & Revenue Forecasting
+<div align="center">
+  <img src="https://i.imgur.com/B942Lcd.png" alt="PipelineIQ Logo" width="120" />
+  <h1 align="center">PipelineIQ RevOps</h1>
+  <p align="center">
+    <strong>Enterprise B2B Deal Pipeline, AI Risk Copilot, and Row-Level RBAC</strong>
+  </p>
 
-> High-density Kanban deal pipeline with weighted revenue forecasting, row-level RBAC, optimistic UI drag-and-drop, and an AI DealRisk Copilot for modern B2B sales teams.
+  <p align="center">
+    <a href="https://pipelineiiq.netlify.app/"><img src="https://img.shields.io/badge/Live%20Demo-Netlify-00C7B7?style=for-the-badge&logo=netlify" alt="Live Demo" /></a>
+    <img src="https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=next.js" alt="Next.js" />
+    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="Prisma" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/Neon-00E599?style=for-the-badge&logo=neon&logoColor=white" alt="Neon Postgres" />
+  </p>
+</div>
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?logo=typescript)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+<br/>
 
 ## 🚀 Live Demo
 
-**URL:** [Coming soon — deploy to Vercel](#deployment)
+**Access the live production build here:** [https://pipelineiiq.netlify.app/](https://pipelineiiq.netlify.app/)
 
-| Account | Email | Password | Role |
+*The application features a 1-Click Zero-Friction login button for ease of access, or you can use the manual credentials below:*
+
+| Account Role | Email | Password | Permissions |
 |---|---|---|---|
-| Demo Admin | `demo@demo.com` | `demo1234` | ADMIN (full CRUD) |
-| Sales Manager | `manager@demo.com` | `demo1234` | MANAGER |
-| Account Executive | `rep@demo.com` | `demo1234` | REP (own deals only) |
+| **System Admin** | `admin@admin.com` | `admin1234` | Full system CRUD, global visibility |
+| **Sales Manager** | `manager@demo.com` | `demo1234` | Team oversight, forecast reporting |
+| **Account Executive** | `rep@demo.com` | `demo1234` | Row-level restricted to owned deals |
 
 ---
 
-## ✨ Features
+## 📖 Overview
 
-- **Kanban Pipeline** — Drag-and-drop deals across stages with optimistic UI updates and rollback toasts on error (powered by `dnd-kit`)
-- **Weighted Forecasting** — Each column header shows `Stage Total × Default Probability%` in real-time
-- **Dense Deals Table** — Sortable multi-column table with debounced server-side search (`~300ms`), URL-mirrored filters (`?query=&stageId=&status=`), and cursor pagination
-- **Deal Detail Drawer** — Slide-over with linked contacts, notes with autosave, and immutable `ActivityLog` audit trail
-- **AI DealRisk Copilot** — One-click deal stall analysis (powered by heuristics + Gemini) scoring deals 0–100 with actionable recommendations
-- **Row-Level RBAC** — `ADMIN → MANAGER → REP → VIEWER` enforced at both middleware and server action level
-- **Global Command Palette** — `Cmd/Ctrl+K` keyboard-driven search across deals and navigation
-- **System-Aware Dark Mode** — Elevates surfaces with lightness, desaturated accents, capped white text opacity
-- **Full SEO** — OpenGraph, JSON-LD, sitemap, robots.txt, semantic HTML, WCAG AA contrast
+**PipelineIQ** is a modern Revenue Operations (RevOps) platform designed to solve the complexities of B2B sales cycles. Built for high-density information display, it provides account executives and sales managers with a real-time, optimistic-UI drag-and-drop Kanban board, weighted revenue forecasting, and an intelligent AI Copilot that assesses deal risk based on pipeline velocity and activity history.
+
+The system is secured by **NextAuth v5** and enforced by strict **Prisma row-level RBAC (Role-Based Access Control)**, ensuring data integrity across multi-tiered sales organizations.
 
 ---
 
-## 🏗 Architecture
+## ✨ Core Features
 
-```
-pipeline-iq/
-├── prisma/
-│   ├── schema.prisma         # Full data model (8 entities)
-│   └── seed.ts               # Demo org, 25 deals, 3 role accounts
-├── src/
-│   ├── app/
-│   │   ├── (auth)/login/     # Sign-in page with 1-click demo login
-│   │   └── (dashboard)/
-│   │       ├── pipeline/     # Kanban board route
-│   │       ├── deals/        # Dense table route
-│   │       └── analytics/    # Revenue forecasting route
-│   ├── components/
-│   │   ├── pipeline/         # KanbanBoard, DealCard
-│   │   ├── deals/            # DealDrawer, CreateDealModal
-│   │   ├── layout/           # Sidebar, Header
-│   │   └── ui/               # Button, Card, Badge, Skeleton, Input...
-│   ├── lib/
-│   │   ├── auth.ts           # Auth.js + bcrypt credentials
-│   │   ├── db.ts             # Prisma singleton with PrismaPg adapter
-│   │   ├── utils.ts          # cn(), formatCurrency(), formatDate()
-│   │   └── validators.ts     # Shared Zod schemas
-│   ├── server/actions/
-│   │   ├── deals.ts          # CRUD + stage updates + notes + audit log
-│   │   ├── analytics.ts      # Weighted forecasting aggregations
-│   │   └── ai.ts             # DealRisk Copilot server action
-│   ├── types/index.ts        # TypeScript interfaces + DTOs
-│   └── middleware.ts         # Route protection + RBAC enforcement
-├── prisma.config.ts          # Prisma v7 config
-├── .env.example              # All required environment variables documented
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-└── LICENSE                   # MIT
-```
+- **Dynamic Kanban Pipeline:** Beautiful, optimistic-UI drag-and-drop interface powered by `@dnd-kit`. Drag deals across stages with zero latency; the backend syncs asynchronously.
+- **AI Deal-Risk Copilot:** Every deal is analyzed by a simulated AI model that calculates risk scores, momentum decay, and win probabilities based on historical activity metadata.
+- **Enterprise RBAC:** Deep row-level security. Sales Reps can only view and edit their own deals; Managers can oversee their entire team; Admins have full structural access.
+- **Weighted Forecasting:** Real-time dashboards calculating total pipeline value vs. weighted probability forecasts.
+- **Activity Telemetry:** A comprehensive activity log that tracks stage regressions, value changes, and manual notes for deep audit trails.
 
-**Database ERD:**
-```
-Organization → Users, PipelineStages, Accounts
-User → Deals (owner), ActivityLogs (actor), DealNotes (author)
-PipelineStage → Deals
-Account → Contacts, Deals
-Deal → ActivityLogs, DealNotes, DealRiskAnalysis (1:1)
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology | Description |
+|---|---|---|
+| **Framework** | **Next.js 14** | App Router, Server Actions, Server Components |
+| **Language** | **TypeScript** | Strict typing across the entire full-stack boundary |
+| **Database** | **PostgreSQL (Neon)** | Serverless Postgres for connection pooling & edge compatibility |
+| **ORM** | **Prisma** | Schema migrations, typed client, and `@prisma/adapter-pg` driver |
+| **Styling** | **Tailwind CSS** | Custom design tokens, glassmorphism UI, fluid responsive design |
+| **Authentication**| **NextAuth.js v5** | Secure credential sessions, protected API routes & middleware |
+| **UI Components** | **Radix UI** | Accessible headless primitives wrapped in a custom design system |
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    Client[Next.js Client Components] -->|Server Actions| API[Next.js Server Actions]
+    Client -->|React Query / Fetch| Route[Next.js Route Handlers]
+    
+    API --> Middleware[NextAuth Middleware]
+    Route --> Middleware
+    
+    Middleware -->|Verified Session| Prisma[Prisma ORM Client]
+    
+    Prisma -->|adapter-pg TCP| Neon[(Neon Serverless Postgres)]
+    
+    subgraph Database Schema
+        Neon --> Users
+        Neon --> Organizations
+        Neon --> Deals
+        Neon --> DealRiskAnalyses
+        Neon --> ActivityLogs
+    end
 ```
 
 ---
 
-## 🛠 Quick Start
+## 💻 Local Development Setup
 
-### Prerequisites
-- Node.js 20+
-- PostgreSQL database (free options: [Neon](https://neon.tech) or [Supabase](https://supabase.com))
+If you wish to run the application locally, follow these steps:
 
-### 1. Clone & Install
+### 1. Clone the repository
 ```bash
 git clone https://github.com/RaghavParasher/pipeline-iq.git
 cd pipeline-iq
+```
+
+### 2. Install dependencies
+```bash
 npm install
 ```
 
-### 2. Configure Environment
+### 3. Configure Environment Variables
+Copy the example environment file:
 ```bash
 cp .env.example .env
 ```
-
-Edit `.env`:
+Open `.env` and configure your keys. You must provide a valid PostgreSQL connection string (we recommend Neon.tech):
 ```env
-DATABASE_URL="postgresql://user:password@host:5432/pipeline_iq?schema=public"
-AUTH_SECRET="your-32-char-random-secret-here"
+DATABASE_URL="postgresql://user:password@endpoint.neon.tech/neondb?sslmode=require"
+AUTH_SECRET="generate-a-random-32-character-string"
 AUTH_URL="http://localhost:3000"
-GEMINI_API_KEY="optional-for-ai-feature"
 ```
 
-### 3. Set Up Database & Seed Demo Data
+### 4. Push Schema & Seed Database
+Synchronize the Prisma schema to your database and run the powerful seeding script to generate an organization, users, and 25 realistic B2B deals:
 ```bash
-npm run db:push     # Apply schema to your database
-npm run db:seed     # Populate demo org, 25 deals, 3 user accounts
+npx prisma db push
+npm run db:seed
 ```
 
-### 4. Start Development Server
+### 5. Run the Development Server
 ```bash
 npm run dev
-# Open http://localhost:3000
-# Sign in with demo@demo.com / demo1234
 ```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🚀 Deployment
+## 🔒 Security Posture
 
-### Vercel (Recommended)
-1. Push repo to GitHub
-2. Import at [vercel.com/new](https://vercel.com/new)
-3. Add environment variables (from `.env.example`)
-4. After first deploy, run `npm run db:seed` against your production database
-
----
-
-## 🧪 Testing
-
-```bash
-npm run type:check    # TypeScript strict mode validation
-npm run lint          # ESLint check
-npm run build         # Production build validation
-```
+- **Passwords:** Hashed via `bcryptjs` with a cost factor of 12.
+- **Sessions:** JWT-based stateless sessions encrypted via `AUTH_SECRET`.
+- **Validation:** Total API boundary validation using `Zod` schemas.
+- **Middleware:** Next.js Edge Middleware intercepts unauthenticated traffic instantly before rendering.
 
 ---
 
 ## 📄 License
 
-MIT — see [LICENSE](./LICENSE)
+This project is licensed under the [MIT License](LICENSE).
