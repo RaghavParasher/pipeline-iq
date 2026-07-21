@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="https://i.imgur.com/B942Lcd.png" alt="PipelineIQ Logo" width="120" />
   <h1 align="center">PipelineIQ RevOps</h1>
   <p align="center">
     <strong>Enterprise B2B Deal Pipeline, AI Risk Copilot, and Row-Level RBAC</strong>
